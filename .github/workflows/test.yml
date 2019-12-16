@@ -12,6 +12,7 @@ jobs:
       fail-fast: false
       matrix:
         node: [6, 8, 12]
+        ruby: [2.4.x]
 
     steps:
       - name: Clone repository
@@ -25,7 +26,7 @@ jobs:
       - name: Set up Ruby 2.4
         uses: actions/setup-ruby@v1
         with:
-          ruby-version: 2.4.x
+          ruby-version: ${{ matrix.ruby }}
 
       - name: Disable gem docs
         run: 'echo "gem: --no-document" > ~/.gemrc'
@@ -34,19 +35,19 @@ jobs:
         uses: actions/cache@v1
         with:
           path: vendor/bundle
-          key: ${{ runner.os }}-gem-${{ hashFiles('Gemfile') }}-${{ hashFiles('Gemfile.lock') }}-${{ hashFiles('.github/workflows/test.yml') }}
+          key: ${{ runner.os }}-ruby-v${{ matrix.ruby }}-${{ hashFiles('Gemfile') }}-${{ hashFiles('Gemfile.lock') }}-${{ hashFiles('.github/workflows/test.yml') }}
           restore-keys: |
-            ${{ runner.os }}-gem-
+            ${{ runner.os }}-ruby-v${{ matrix.ruby }}-${{ hashFiles('Gemfile') }}-${{ hashFiles('Gemfile.lock') }}-${{ hashFiles('.github/workflows/test.yml') }}
+            ${{ runner.os }}-ruby-v${{ matrix.ruby }}-
 
       - name: Set up npm cache
         uses: actions/cache@v1
         with:
           path: ~/.npm
-          key: ${{ runner.os }}-node-v{{ matrix.node }}-${{ hashFiles('package.json') }}-${{ hashFiles('package-lock.json') }}-${{ hashFiles('.github/workflows/test.yml') }}
+          key: ${{ runner.os }}-node-v${{ matrix.node }}-${{ hashFiles('package.json') }}-${{ hashFiles('package-lock.json') }}-${{ hashFiles('.github/workflows/test.yml') }}
           restore-keys: |
-            ${{ runner.OS }}-node-v{{ matrix.node }}-${{ env.cache-name }}-
-            ${{ runner.OS }}-node-v{{ matrix.node }}-
-            ${{ runner.OS }}-
+            ${{ runner.OS }}-node-v${{ matrix.node }}-${{ hashFiles('package.json') }}-${{ hashFiles('package-lock.json') }}-${{ hashFiles('.github/workflows/test.yml') }}
+            ${{ runner.OS }}-node-v${{ matrix.node }}-
 
       - name: Set up Bundler
         run: gem install bundler -v "~> 1.17"
